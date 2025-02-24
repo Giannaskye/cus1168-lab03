@@ -5,12 +5,12 @@ import java.util.regex.*;
 
 public class Lexer {
     private static final Pattern[] PATTERNS = {
-            Pattern.compile("\\s+"),                                       // whitespace
+            Pattern.compile("\\s+"), // whitespace
             Pattern.compile("\\b(if|else|for|while|int|float|String)\\b"), // keywords
-            Pattern.compile("\\b\\d+(\\.\\d+)?\\b"),                      // literals
-            Pattern.compile("==|<=|>=|!=|&&|\\|\\||[+\\-*/=<>!]"),        // operators
-            Pattern.compile("[;,.(){}\\[\\]]"),                           // punctuation
-            Pattern.compile("\\b[a-zA-Z_][a-zA-Z0-9_]*\\b")               // identifiers
+            Pattern.compile("\\b\\d+(\\.\\d+)?\\b"), // literals
+            Pattern.compile("==|<=|>=|!=|&&|\\|\\||[+\\-*/=<>!]"), // operators
+            Pattern.compile("[;,.(){}\\[\\]]"), // punctuation
+            Pattern.compile("\\b[a-zA-Z_][a-zA-Z0-9_]*\\b") // identifiers
     };
 
     private static final String[] TYPES = {
@@ -23,7 +23,7 @@ public class Lexer {
     };
 
     private String input;
-    private List<String[]> tokens;
+    private List<Token> tokens;
     private int position;
 
     /**
@@ -36,6 +36,9 @@ public class Lexer {
      */
     public Lexer(String input) {
         // Your code here
+        this.input = input;
+        this.position = 0;
+
     }
 
     /**
@@ -44,38 +47,81 @@ public class Lexer {
      * 1. Create a while loop that continues while position < input.length()
      * 2. Get the remaining input using substring(position)
      * 3. Try to match each pattern in PATTERNS array:
-     *    - Create a matcher using pattern.matcher(remainingInput)
-     *    - Use matcher.lookingAt() to check if it matches at current position
-     *    - If match found:
-     *      a. Get the matched text using matcher.group()
-     *      b. If not whitespace, add new token to tokens list
-     *      c. Update position by adding length of matched text
+     * - Create a matcher using pattern.matcher(remainingInput)
+     * - Use matcher.lookingAt() to check if it matches at current position
+     * - If match found:
+     * a. Get the matched text using matcher.group()
+     * b. If not whitespace, add new token to tokens list
+     * c. Update position by adding length of matched text
      * 4. If no pattern matches, throw RuntimeException for invalid input
+     * 
+     * @return
      */
-    public void tokenize() {
-        // Your code here
-    }
 
-    /**
-     * TODO: Return the list of tokens
-     * 1. Return the tokens list containing all found tokens
-     * 2. Each token should be a String array with two elements:
-     *    - First element: Token type (from TYPES array)
-     *    - Second element: Token value (the actual text)
-     *
-     * @return List<String [ ]> The list of tokens
-     */
-    public List<String[]> getTokens() {
+    public List<String[]> tokenize() {
         // Your code here
-        return null;
-    }
+        while (position < input.length()) {
+            String remaining = input.substring(position);
+            boolean matched = false;
 
-    public static void main(String[] args) {
-        String code = "int x = 10; if (x > 5) { x = x + 1; }";
-        Lexer lexer = new Lexer(code);
-        lexer.tokenize();
-        for (String[] token : lexer.getTokens()) {
-            System.out.println(token[0] + ": " + token[1]);
+            for (Pattern pattern : PATTERNS) {
+                Matcher matcher = pattern.matcher(remaining);
+                if (matcher.lookingAt()) {
+                    String matchedText = matcher.group();
+
+                    if (!pattern.pattern().equals("\\s+")) {
+                        tokens.add(new Token(matchedText));
+
+                    }
+                    position += matchedText.length();
+                    matched = true;
+                    break;
+                }
+
+                // no pattern error
+                if (!matched) {
+                    throw new RuntimeException("Unexpected Characters at poisiton " + position + ": "
+                            + remaining.charAt(0));
+                }
+
+            }
+
+            return tokens;
+
         }
+
+    }
+
+    class Token {
+        private String value;
+
+        public Token(String value) {
+            this.value = value;
+
+        }
+
+        /**
+         * TODO: Return the list of tokens
+         * 1. Return the tokens list containing all found tokens
+         * 2. Each token should be a String array with two elements:
+         * - First element: Token type (from TYPES array)
+         * - Second element: Token value (the actual text)
+         *
+         * @return List<String [ ]> The list of tokens
+         */
+        public List<String[]> getTokens() {
+            // Your code here
+            return tokens;
+        }
+
+        public static void main(String[] args) {
+            String code = "int x = 10; if (x > 5) { x = x + 1; }";
+            Lexer lexer = new Lexer(code);
+            lexer.tokenize();
+            for (String[] token : lexer.getTokens()) {
+                System.out.println(token[0] + ": " + Arrays.toString(token));
+            }
+        }
+
     }
 }
